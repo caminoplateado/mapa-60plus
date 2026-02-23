@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Camino Plateado — Evolución 60+ (2010–2022)</title>
+
+  <!-- Mapbox GL JS -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+
+  <!-- Mapbox Geocoder -->
+  <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.2/mapbox-gl-geocoder.css" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.2/mapbox-gl-geocoder.min.js"></script>
+
+  <!-- noUiSlider -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
+
+  <!-- CSV/XLSX loaders -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js"></script>
+
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <img class="brand__logo" src="./assets/logo-white.png" alt="Camino Plateado" />
+        <div class="brand__text">
+          <div class="brand__title">Evolución población 60+</div>
+          <div class="brand__subtitle">Centros urbanos de Argentina (Censos 2010 y 2022)</div>
+        </div>
+      </div>
+
+      <section class="panel">
+        <div class="panel__row">
+          <h3>Buscar y filtrar</h3>
+          <button id="btnReset" class="btn btn--ghost" type="button">Reset</button>
+        </div>
+
+        <div class="geocoderRow">
+          <div id="geocoder" class="geocoder"></div>
+          <button id="btnMyLoc" class="myLocBtn" type="button" title="Usar mi ubicación">📍</button>
+        </div>
+        <div class="hint">Búsqueda limitada a Argentina.</div>
+
+        <label class="field">
+          <span class="field__label">Provincia</span>
+          <select id="selProvincia" class="field__control">
+            <option value="">Todas</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Localidad</span>
+          <select id="selLocalidad" class="field__control" disabled>
+            <option value="">Todas</option>
+          </select>
+          <div class="hint">Se habilita al elegir provincia.</div>
+        </label>
+
+        <div class="sliderBlock">
+          <div class="sliderBlock__header">
+            <div class="sliderBlock__title">Población total (2022)</div>
+            <div id="labPop" class="sliderBlock__value">—</div>
+          </div>
+          <div id="slPop" class="slider"></div>
+        </div>
+
+        <div class="sliderBlock">
+          <div class="sliderBlock__header">
+            <div class="sliderBlock__title">% población 60+ (2022)</div>
+            <div id="labPct" class="sliderBlock__value">—</div>
+          </div>
+          <div id="slPct" class="slider"></div>
+        </div>
+
+        <div class="sliderBlock">
+          <div class="sliderBlock__header">
+            <div class="sliderBlock__title">Crecimiento %60+ (p.p., 2010–2022)</div>
+            <div id="labPP" class="sliderBlock__value">—</div>
+          </div>
+          <div id="slPP" class="slider"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel__row">
+          <h3>Resumen</h3>
+          <button id="btnClearSel" class="btn btn--ghost" type="button" title="Limpiar selección">Limpiar selección</button>
+        </div>
+
+        <div id="scope" class="scope">Argentina</div>
+
+        <div class="kpis kpis--tight">
+          <div class="kpi">
+            <div class="kpi__label">Localidades incluidas</div>
+            <div id="kpiCount" class="kpi__value">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Población total (2022)</div>
+            <div id="kpiTotal22" class="kpi__value">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Población 60+ (2022)</div>
+            <div id="kpi60_22" class="kpi__value">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">% 60+ (2022)</div>
+            <div id="kpiPct22" class="kpi__value">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Crecimiento 60+ (p.p.)</div>
+            <div id="kpiPP" class="kpi__value">—</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="miniTable" aria-label="Detalle 2010 vs 2022">
+          <div class="miniTable__h"></div>
+          <div class="miniTable__h">2010</div>
+          <div class="miniTable__h">2022</div>
+
+          <div class="miniTable__k">Total</div>
+          <div id="dTotal10" class="miniTable__v">—</div>
+          <div id="dTotal22" class="miniTable__v">—</div>
+
+          <div class="miniTable__k">60+</div>
+          <div id="d60_10" class="miniTable__v">—</div>
+          <div id="d60_22" class="miniTable__v">—</div>
+
+          <div class="miniTable__k">%60+</div>
+          <div id="dPct10" class="miniTable__v">—</div>
+          <div id="dPct22" class="miniTable__v">—</div>
+        </div>
+
+        <div class="miniGrowth">
+          <div class="miniGrowth__item">
+            <span>Crec. 60+ (personas)</span>
+            <b id="dAbs60">—</b>
+          </div>
+          <div class="miniGrowth__item">
+            <span>Crec. 60+ (relativo)</span>
+            <b id="dRel60">—</b>
+          </div>
+        </div>
+      </section>
+
+      <div class="footnote">
+        Fuente: INDEC (Censos 2010 y 2022). Elaboración: Camino Plateado.
+      </div>
+    </aside>
+
+    <main class="mapWrap">
+      <div id="map" class="map"></div>
+
+      <div class="mapLegend" role="note" aria-label="Leyenda">
+        <div class="mapLegend__title">Crecimiento %60+ (p.p.)</div>
+        <div class="legend">
+          <div class="legend__bar" id="legendBar"></div>
+          <div class="legend__labels">
+            <span id="legMin">—</span>
+            <span id="legZero">0</span>
+            <span id="legMax">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="errorBanner" class="errorBanner hidden"></div>
+      <div class="mapCredit">© Mapbox © OpenStreetMap</div>
+    </main>
+  </div>
+  <script src="./assets/config"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
