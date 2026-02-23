@@ -24,7 +24,7 @@ body{
 .cp-back{
   position: fixed;
   top: 12px;
-  right: 12px;
+  right: 60px;
   z-index: 10000;
   display: inline-flex;
   align-items: center;
